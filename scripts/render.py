@@ -13,7 +13,7 @@ import shutil
 import struct
 import tempfile
 from playwright.sync_api import sync_playwright
-from browser_support import ROOT, serve, launch, restrict_network
+from browser_support import ROOT, serve, launch, restrict_network, wait_for_condition
 
 EXPORT = r'''async job => {
   const agent = window.paintAgent, s = agent.getState();
@@ -52,7 +52,7 @@ def render(job_path: Path, output: Path):
             page = context.new_page()
             page.set_default_timeout(30000)
             page.goto(origin + '/AIPaint/')
-            page.wait_for_function('!!window.paintAgent')
+            wait_for_condition(page, '() => !!window.paintAgent')
             result = page.evaluate(EXPORT, job)
             browser_version = browser.version
         finally:

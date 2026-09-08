@@ -1,12 +1,12 @@
 """Local-only test/renderer server; never serves credentials or arbitrary paths."""
 from contextlib import contextmanager
-from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from threading import Thread
 from urllib.parse import unquote, urlsplit
 import os
 import shutil
+import time
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -56,3 +56,17 @@ def restrict_network(context, origin):
         else:
             route.abort()
     context.route('**/*', route_request)
+
+def wait_for_condition(page, predicate, timeout_ms=10000):
+    """Poll through the automation protocol, without page-side eval timers.
+
+    Playwright 1.57 string predicates can be reevaluated inside a page timer,
+    where the application's strict CSP correctly rejects eval. Keep CSP intact.
+    Only trusted, fixed function literals from the test/renderer call this helper.
+    """
+    deadline = time.monotonic() + timeout_ms / 1000
+    while time.monotonic() < deadline:
+        if page.evaluate(predicate):
+            return
+        page.wait_for_timeout(25)
+    raise TimeoutError(f'Condition not met within {timeout_ms} ms: {predicate}')

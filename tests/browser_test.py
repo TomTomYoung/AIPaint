@@ -5,7 +5,7 @@ import sys
 import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from playwright.sync_api import sync_playwright
-from browser_support import ROOT, serve, launch, restrict_network
+from browser_support import ROOT, serve, launch, restrict_network, wait_for_condition
 
 class BrowserTests(unittest.TestCase):
     @classmethod
@@ -29,7 +29,7 @@ class BrowserTests(unittest.TestCase):
         self.page.on('pageerror', lambda e: self.errors.append(str(e)))
         self.page.on('dialog', lambda dialog: dialog.accept())
         self.page.goto(self.origin + '/AIPaint/')
-        self.page.wait_for_function('!!window.paintAgent && window.paintAgent.getState().revision === 1')
+        wait_for_condition(self.page, '() => !!window.paintAgent && window.paintAgent.getState().revision === 1')
 
     def tearDown(self):
         self.assertEqual(self.errors, [])
@@ -66,18 +66,18 @@ class BrowserTests(unittest.TestCase):
 
     def test_04_project_roundtrip_preserves_layers(self):
         self.page.locator('#demo').click()
-        self.page.wait_for_function('paintAgent.getState().layers.length===2')
+        wait_for_condition(self.page, '() => paintAgent.getState().layers.length === 2')
         before = self.page.evaluate('Array.from(paintAgent.composite().data)')
         project = self.page.evaluate('paintAgent.exportProject({documentId:paintAgent.getState().documentId, revision:paintAgent.getState().revision})')
         old_id = self.state()['documentId']
         self.page.locator('#open-project').set_input_files({'name':'project.paint.json','mimeType':'application/json','buffer':json.dumps(project).encode()})
-        self.page.wait_for_function('paintAgent.getState().revision===0')
+        wait_for_condition(self.page, '() => paintAgent.getState().revision === 0')
         self.assertNotEqual(self.state()['documentId'], old_id)
         self.assertEqual(before, self.page.evaluate('Array.from(paintAgent.composite().data)'))
 
     def test_05_png_bytes_dimensions_and_transparency(self):
         self.page.locator('#demo').click()
-        self.page.wait_for_function('paintAgent.getState().layers.length===2')
+        wait_for_condition(self.page, '() => paintAgent.getState().layers.length === 2')
         result = self.page.evaluate('''async () => {
           const a=paintAgent,s=a.getState(),im=await a.exportImage({documentId:s.documentId,revision:s.revision});
           const bmp=await createImageBitmap(im.blob),c=document.createElement('canvas'); c.width=bmp.width;c.height=bmp.height;
@@ -122,7 +122,7 @@ class BrowserTests(unittest.TestCase):
 
     def test_10_mobile_and_screenshot(self):
         self.page.locator('#demo').click()
-        self.page.wait_for_function('paintAgent.getState().layers.length===2')
+        wait_for_condition(self.page, '() => paintAgent.getState().layers.length === 2')
         folder = ROOT/'outputs'/'test';folder.mkdir(parents=True,exist_ok=True)
         self.page.screenshot(path=str(folder/'desktop.png'),full_page=True)
         self.page.set_viewport_size({'width':390,'height':844})
