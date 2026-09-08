@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "paint-job/1",
+  "jobId": "slime-demo-001",
+  "idempotencyKey": "slime-demo-001",
+  "rendererProfile": "pixel-v0.1",
+  "source": { "kind": "blank", "documentId": "slime-demo", "width": 128, "height": 128, "mode": "pixel", "background": "transparent", "colorSpace": "srgb" },
+  "batches": [{
+    "batchId": "draw-slime", "expectedRevision": 0,
+    "commands": [
+      { "type": "layer.add", "id": "body", "name": "本体" },
+      { "type": "shape.ellipse", "layerId": "body", "x": 18, "y": 48, "width": 92, "height": 68, "fill": "#183F38FF" },
+      { "type": "shape.ellipse", "layerId": "body", "x": 22, "y": 47, "width": 84, "height": 63, "fill": "#4DBB83FF" },
+      { "type": "shape.ellipse", "layerId": "body", "x": 33, "y": 52, "width": 54, "height": 32, "fill": "#88E0A0FF" },
+      { "type": "shape.ellipse", "layerId": "body", "x": 42, "y": 56, "width": 23, "height": 10, "fill": "#D9F7C7FF" },
+      { "type": "layer.add", "id": "face", "name": "顔" },
+      { "type": "shape.rect", "layerId": "face", "x": 44, "y": 79, "width": 7, "height": 11, "fill": "#183F38FF" },
+      { "type": "shape.rect", "layerId": "face", "x": 78, "y": 79, "width": 7, "height": 11, "fill": "#183F38FF" },
+      { "type": "shape.line", "layerId": "face", "x": 57, "y": 96, "x2": 72, "y2": 96, "size": 2, "color": "#183F38FF" }
+    ]
+  }],
+  "output": { "assetId": "slime-green", "revisionId": "v001", "publishMode": "pull_request", "reviewStatus": "candidate" },
+  "checks": { "width": 128, "height": 128, "requireTransparency": true, "maxOpaqueColors": 8 }
+}

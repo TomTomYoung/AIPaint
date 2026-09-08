@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>AIPaint — Pixel workspace</title>
+<link rel="icon" href="data:,"><link rel="stylesheet" href="./style.css">
+<script type="module" src="./src/app.js"></script>
+</head>
+<body>
+<header><div class="brand"><span class="mark">A<span>i</span></span><div><h1>AIPaint <small>0.1</small></h1><p>PIXEL WORKSPACE / HUMAN + AGENT</p></div></div><div class="header-actions"><span class="badge">PIXEL ENGINE</span><button id="save-png" class="primary">PNGを書き出す</button></div></header>
+<div class="notice">描画・原稿保存が使える初期版です。GitHubへの画像保存とWebMCP直接操作は、まだ接続していません。</div>
+<main>
+<aside class="tools panel">
+<h2>描画ツール</h2>
+<div id="tools" class="tool-grid" role="group" aria-label="描画ツール">
+<button data-tool="brush" aria-pressed="true">ペン <kbd>B</kbd></button><button data-tool="eraser" aria-pressed="false">消しゴム <kbd>E</kbd></button>
+<button data-tool="line" aria-pressed="false">直線 <kbd>L</kbd></button><button data-tool="rect" aria-pressed="false">矩形 <kbd>R</kbd></button>
+<button data-tool="ellipse" aria-pressed="false">楕円 <kbd>O</kbd></button><button data-tool="fill" aria-pressed="false">塗りつぶし <kbd>F</kbd></button>
+</div>
+<p id="tool-help" class="help">ドラッグして描き、離すと確定します。一筆がUndo一回分です。</p>
+<label>描画色<input id="color" type="color" value="#245749"></label>
+<div id="palette" class="palette" aria-label="カラーパレット"></div>
+<label>太さ <output id="size-label">1 px</output><input id="size" type="range" min="1" max="32" value="1"></label>
+<label>描画の不透明度 <output id="alpha-label">100%</output><input id="alpha" type="range" min="1" max="100" value="100"></label>
+<p class="help">ペンと直線は正方形のブラシです。矩形と楕円は内側を塗ります。消しゴムは透明に戻します。</p>
+<div class="row"><button id="undo">元に戻す</button><button id="redo">やり直す</button></div>
+<section><h2>新規キャンバス</h2><div class="row"><label>幅<input id="width" type="number" min="1" max="1024" value="128"></label><span>×</span><label>高さ<input id="height" type="number" min="1" max="1024" value="128"></label></div><button id="new-document" class="wide">新しく作る</button><p class="help">1〜1024 px。現在の原稿を置き換える前に確認します。</p></section>
+<section><h2>原稿の保存・再開</h2><button id="save-project" class="wide">編集可能な原稿を保存</button><label class="file-button">原稿JSONを開く<input id="open-project" type="file" accept=".json,application/json"></label><button id="restore" class="wide">ブラウザ内の自動保存を復元</button><p class="help">PNGは完成画像、原稿JSONはレイヤー付きです。自動保存はこのブラウザ内だけです。</p><p id="autosave" class="help">自動保存：まだありません</p></section>
+</aside>
+<section class="workspace">
+<div class="workspace-bar"><span id="dimensions">128 × 128</span><span id="coordinates">x — / y —</span><label>表示倍率 <select id="zoom"><option value="1">100%</option><option value="2">200%</option><option value="4" selected>400%</option><option value="6">600%</option><option value="8">800%</option></select></label></div>
+<div class="canvas-area"><div class="canvas-wrap"><canvas id="canvas" width="128" height="128" aria-label="描画キャンバス。ドラッグで描きます。" tabindex="0"></canvas></div></div>
+<div class="workspace-footer"><span id="document-state"></span><span>透明背景 / sRGB / 8bit RGBA</span></div>
+<div id="status" class="status" role="status" aria-live="polite">準備中です。</div>
+</section>
+<aside class="inspector panel">
+<div class="section-title"><h2>レイヤー</h2><button id="add-layer">＋追加</button></div>
+<p class="help">上の行が前面です。名前を押して描画対象を選択します。</p>
+<div id="layers"></div>
+<div class="row"><button id="layer-up">前面へ</button><button id="layer-down">背面へ</button><button id="remove-layer">削除</button></div>
+<label>選択レイヤーの不透明度<input id="layer-opacity" type="range" min="0" max="100" value="100"></label>
+<section><div class="section-title"><h2>AI操作 / JSON</h2><span class="badge small">LOCAL API</span></div>
+<p class="help">操作配列を入力すると、選択レイヤーとは独立に <code>layerId</code> のレイヤーへ適用します。任意のJavaScriptは実行しません。</p>
+<textarea id="commands" spellcheck="false" aria-label="操作JSON" rows="11"></textarea>
+<div class="row"><button id="apply-json" class="primary">操作を適用</button><button id="sample-commands">入力例</button></div>
+<p class="help">サンプルジョブは新しい原稿を作ります。再読み込み後も同じ描画を再現できます。</p>
+<button id="demo" class="wide">サンプルジョブ：スライム</button>
+<details><summary>現在の状態と機能</summary><pre id="agent-state"></pre></details>
+<p class="help">保存先：未接続。PNGを書き出しただけでは、GitHub保存済みになりません。</p>
+</section>
+</aside>
+</main>
+<footer>AIPaint / 同じ原稿、同じ描画エンジン。 <a href="./doc/README.md">仕様・進捗・引き継ぎ</a></footer>
+<noscript>このペイントソフトにはJavaScriptが必要です。</noscript>
+</body></html>
