@@ -2,6 +2,8 @@
 
 [現行の実装仕様](SPEC.md)
 
+[用途別ツール戦略・反省点](TOOLING_STRATEGY.md)
+
 [実装状況と検証記録](STATUS.md)
 
 [次の担当者向け引き継ぎ](HANDOFF.md)
