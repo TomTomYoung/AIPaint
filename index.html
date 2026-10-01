@@ -9,10 +9,16 @@
 <script type="module" src="./src/app.js"></script>
 </head>
 <body>
-<header><div class="brand"><span class="mark">A<span>i</span></span><div><h1>AIPaint <small>0.1</small></h1><p>PIXEL WORKSPACE / HUMAN + AGENT</p></div></div><div class="header-actions"><span class="badge">PIXEL ENGINE</span><button id="save-png" class="primary">PNGを書き出す</button></div></header>
-<div class="notice">描画・原稿保存が使える初期版です。GitHubへの画像保存とWebMCP直接操作は、まだ接続していません。</div>
+<header><div class="brand"><span class="mark">A<span>i</span></span><div><h1>AIPaint <small>0.1</small></h1><p>PIXEL WORKSPACE / HUMAN + AGENT</p></div></div><div class="header-actions"><span id="engine-badge" class="badge">PIXEL ENGINE</span><button id="save-png" class="primary">PNGを書き出す</button></div></header>
+<div class="notice">用途ごとに専門ツールへ切り替えます。未接続の外部ツールはhandoffとして明示し、Pixel Coreへ代替しません。</div>
 <main>
 <aside class="tools panel">
+<section class="route-panel">
+<h2>制作ルート</h2>
+<label>用途<select id="production-purpose" aria-label="制作用途"></select></label>
+<label>使用ツール<select id="production-tool" aria-label="使用ツール"></select></label>
+<p id="route-summary" class="route-summary"></p>
+</section>
 <h2>描画ツール</h2>
 <div id="tools" class="tool-grid" role="group" aria-label="描画ツール">
 <button data-tool="brush" aria-pressed="true">ペン <kbd>B</kbd></button><button data-tool="eraser" aria-pressed="false">消しゴム <kbd>E</kbd></button>
@@ -52,6 +58,6 @@
 </section>
 </aside>
 </main>
-<footer>AIPaint / 同じ原稿、同じ描画エンジン。 <a href="./doc/README.md">仕様・進捗・引き継ぎ</a></footer>
+<footer>AIPaint / 用途に合う専門ツールを選び、Pixel Coreはドット絵に使う。 <a href="./doc/README.md">仕様・進捗・引き継ぎ</a></footer>
 <noscript>このペイントソフトにはJavaScriptが必要です。</noscript>
 </body></html>
