@@ -10,7 +10,10 @@ function guard(fn) { return async (...args) => { try { await fn(...args); } catc
 const agent = createAgent(() => { dirty = true; render(); scheduleSave(); });
 window.paintAgent = agent;
 const toolRouter = createToolRouter({
-  adapters: [{ id: 'pixel', execute: payload => agent.runJob(payload) }]
+  adapters: [
+    { id: 'pixel', execute: payload => agent.runJob(payload) },
+    { id: 'blockout-3d', execute: payload => ({ workspace: './modeler.html', payload }) }
+  ]
 });
 function makeOption(value, label) {
   const option = document.createElement('option'); option.value = value; option.textContent = label; return option;
@@ -37,11 +40,13 @@ function syncRoutingControls(rebuildTools = false) {
     : `${routeNames}。外部アダプタ接続が必要です。Pixel Coreへ代替しません。`;
   $('route-summary').classList.toggle('warning', !route.available);
   $('engine-badge').textContent = route.available ? route.toolLabel : `${route.toolLabel} / HANDOFF`;
+  $('open-routed-tool').hidden = route.toolId !== 'blockout-3d';
 }
 for (const purpose of toolRouter.listPurposes()) $('production-purpose').append(makeOption(purpose.id, purpose.label));
 $('production-purpose').value = toolRouter.getState().activePurpose;
 $('production-purpose').onchange = () => syncRoutingControls(true);
 $('production-tool').onchange = () => syncRoutingControls(false);
+$('open-routed-tool').onclick = () => { location.href = './modeler.html'; };
 syncRoutingControls(true);
 window.aipaintToolRouter = Object.freeze({
   getState: () => toolRouter.getState(),
