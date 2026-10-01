@@ -13,7 +13,7 @@
 
 `src/tool-router.js`は制作用途と専門ツールを分離する上位ルータです。AIPaintのPixel Coreは唯一の万能レンダラではなく、ドット絵系用途を担当する一つのアダプタとして扱います。
 
-現行カタログはPixel Core、Raster editor、Vector editor、Image generation、Blender/3D modelerを持ちます。用途ごとに単一ツールまたは順序付きパイプラインを定義します。例えば3D下絵から2D仕上げは `blender-3d → raster-editor`、コンセプトアートは `image-generation → raster-editor` です。
+現行カタログはPixel Core、AIPaint Blockout Modeler、Raster editor、Vector editor、Image generation、Blender/3D modelerを持ちます。Blockout Modelerは `modeler.html` と `src/modeler-core.js` で構成し、立方体・球・円柱の3Dメッシュ、位置・回転・拡縮、透視表示、軌道カメラ、編集可能シーンJSON、OBJ出力を提供します。本格3D用途は引き続きBlenderへルーティングします。用途ごとに単一ツールまたは順序付きパイプラインを定義します。例えば3D下絵から2D仕上げは `blender-3d → raster-editor`、コンセプトアートは `image-generation → raster-editor` です。
 
 ブラウザ版で現在登録済みの実行アダプタは `pixel` のみです。外部アダプタが未接続の用途は `requiresHandoff: true` として表現し、実行時は `TOOL_UNAVAILABLE` を返します。不適切な別レンダラへ自動フォールバックしません。
 
