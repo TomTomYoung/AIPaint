@@ -134,7 +134,7 @@ const route = router.route();
 await router.execute({ payload: { /* tool-specific task */ } });
 ```
 
-外部アダプタが未接続なら `TOOL_UNAVAILABLE` になる。これは意図した動作である。
+外部アダプタが未接続なら `TOOL_UNAVAILABLE` になる。これは意図した動作である。ブラウザ実行中にMCPブリッジ等が利用可能になった場合は `aipaintToolRouter.registerAdapter({ id, execute })` で登録し、同じルータをそのまま利用可能状態へ切り替える。
 
 ## 今後の優先順位
 
