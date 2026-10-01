@@ -42,6 +42,15 @@ export const TOOL_CATALOG = freezeList([
     description: '構図、デザイン、複雑な絵作りの初稿生成向け。'
   },
   {
+    id: 'blockout-3d',
+    label: 'AIPaint Blockout Modeler',
+    family: '3d',
+    execution: 'local',
+    integration: 'built-in',
+    purposes: ['3d-blockout'],
+    description: 'プリミティブを組み合わせるゲーム素材の3Dブロックアウト向け。'
+  },
+  {
     id: 'blender-3d',
     label: '3D modeler / Blender',
     family: '3d',
@@ -60,6 +69,7 @@ export const PURPOSE_CATALOG = Object.freeze([
   Object.freeze({ id: 'vector-asset', label: 'ベクター素材', pipeline: Object.freeze(['vector-editor']) }),
   Object.freeze({ id: 'concept-art', label: 'コンセプトアート', pipeline: Object.freeze(['image-generation', 'raster-editor']) }),
   Object.freeze({ id: 'illustration', label: 'イラスト素材', pipeline: Object.freeze(['image-generation', 'raster-editor']) }),
+  Object.freeze({ id: '3d-blockout', label: '3Dブロックアウト', pipeline: Object.freeze(['blockout-3d']) }),
   Object.freeze({ id: '3d-model', label: '3Dモデル', pipeline: Object.freeze(['blender-3d']) }),
   Object.freeze({ id: '3d-pose-reference', label: '3Dポーズ・デッサン参照', pipeline: Object.freeze(['blender-3d']) }),
   Object.freeze({ id: '3d-render-to-2d', label: '3D下絵から2D仕上げ', pipeline: Object.freeze(['blender-3d', 'raster-editor']) }),
