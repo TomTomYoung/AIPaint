@@ -138,5 +138,23 @@ class BrowserTests(unittest.TestCase):
         self.assertTrue(route['requiresHandoff'])
         self.assertIn('Pixel Coreへ代替しません', self.page.locator('#route-summary').inner_text())
 
+    def test_12_local_blockout_modeler(self):
+        self.page.locator('#production-purpose').select_option('3d-blockout')
+        route = self.page.evaluate("aipaintToolRouter.route()")
+        self.assertEqual(route['toolId'], 'blockout-3d')
+        self.assertTrue(route['available'])
+        self.assertTrue(self.page.locator('#open-routed-tool').is_visible())
+        self.page.goto(self.origin + '/AIPaint/modeler.html')
+        wait_for_condition(self.page, '() => !!window.blockoutModeler && blockoutModeler.getState().objects.length === 1')
+        result = self.page.evaluate("""() => {
+          const sphere=blockoutModeler.addObject('sphere',{name:'Head',position:[0,1.5,0],scale:[.8,.8,.8]});
+          blockoutModeler.updateObject(sphere.id,{rotation:[0,30,0]});
+          return {count:blockoutModeler.getState().objects.length,obj:blockoutModeler.exportOBJ()};
+        }""")
+        self.assertEqual(result['count'], 2)
+        self.assertIn('o Head', result['obj'])
+        self.assertIn('f ', result['obj'])
+        self.assertTrue(self.page.locator('#model-canvas').is_visible())
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
