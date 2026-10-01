@@ -8,6 +8,18 @@
 
 `index.html`と`style.css`は相対パスのみを使います。アプリに外部CDN、GitHubトークン、外部画像URL、eval、任意コード実行機能はありません。
 
+
+## 用途別Tool Router
+
+`src/tool-router.js`は制作用途と専門ツールを分離する上位ルータです。AIPaintのPixel Coreは唯一の万能レンダラではなく、ドット絵系用途を担当する一つのアダプタとして扱います。
+
+現行カタログはPixel Core、Raster editor、Vector editor、Image generation、Blender/3D modelerを持ちます。用途ごとに単一ツールまたは順序付きパイプラインを定義します。例えば3D下絵から2D仕上げは `blender-3d → raster-editor`、コンセプトアートは `image-generation → raster-editor` です。
+
+ブラウザ版で現在登録済みの実行アダプタは `pixel` のみです。外部アダプタが未接続の用途は `requiresHandoff: true` として表現し、実行時は `TOOL_UNAVAILABLE` を返します。不適切な別レンダラへ自動フォールバックしません。
+
+`window.aipaintToolRouter`から用途一覧、ツール一覧、計画、現在ルート、選択、実行を参照できます。`registerAdapter({ id, execute })`で実行中に外部アダプタを接続すると、UIの利用可能状態も更新されます。外部ツール固有のMCP接続実装は後続ですが、接続有無と推奨経路は同じルータ定義をUIとAgent側で共有します。
+
+
 ## 描画規則
 
 初版はpixelモードのみです。座標は左上原点の整数画像ピクセルで、CSSサイズや表示倍率の影響を受けません。最大1024×1024、16レイヤー、全レイヤー合計4,194,304画素です。この値は初期版の独自ガード値で、全体仕様の最終目標値やブラウザの公式上限ではありません。

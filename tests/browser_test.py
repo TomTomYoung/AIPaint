@@ -129,5 +129,14 @@ class BrowserTests(unittest.TestCase):
         self.assertTrue(self.page.locator('#canvas').is_visible())
         self.page.screenshot(path=str(folder/'mobile.png'),full_page=True)
 
+    def test_11_tool_router_handoff_does_not_fall_back_to_pixel(self):
+        self.assertEqual(self.page.evaluate("aipaintToolRouter.route().toolId"), 'pixel')
+        self.page.locator('#production-purpose').select_option('3d-model')
+        route = self.page.evaluate("aipaintToolRouter.route()")
+        self.assertEqual(route['toolId'], 'blender-3d')
+        self.assertFalse(route['available'])
+        self.assertTrue(route['requiresHandoff'])
+        self.assertIn('Pixel Coreへ代替しません', self.page.locator('#route-summary').inner_text())
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
