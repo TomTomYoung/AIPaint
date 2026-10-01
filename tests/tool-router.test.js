@@ -45,6 +45,13 @@ test('execution switches to a registered purpose-specific adapter', async () => 
   assert.deepEqual(calls, ['blender-3d']);
 });
 
+test('a tool becomes available when an adapter is registered later', () => {
+  const router = createToolRouter();
+  assert.equal(router.route({ purpose: '3d-model' }).available, false);
+  router.registerAdapter({ id: 'blender-3d', execute: payload => payload });
+  assert.equal(router.route({ purpose: '3d-model' }).available, true);
+});
+
 test('unavailable tools fail explicitly instead of silently degrading', async () => {
   const router = createToolRouter();
   await assert.rejects(router.execute({ purpose: 'illustration', payload: {} }), error => error instanceof ToolRoutingError && error.code === 'TOOL_UNAVAILABLE');
