@@ -21,7 +21,7 @@ class Handler(SimpleHTTPRequestHandler):
         if path == '/':
             path = '/index.html'
         candidate = (ROOT / path.lstrip('/')).resolve()
-        allowed = path in ('/index.html', '/style.css') or path.startswith(('/src/', '/examples/', '/doc/'))
+        allowed = path in ('/index.html', '/style.css', '/modeler.html', '/modeler.css') or path.startswith(('/src/', '/examples/', '/doc/'))
         if not allowed or not candidate.is_relative_to(ROOT) or not candidate.is_file():
             self.send_error(404)
             return

@@ -19,6 +19,18 @@ test('3D work never falls back to the pixel renderer', () => {
   assert.deepEqual(route.pipeline, ['blender-3d']);
 });
 
+test('3D blockout uses the local modeler without changing full 3D routing', () => {
+  const router = createToolRouter({ adapters: [
+    { id: 'pixel', execute: payload => payload },
+    { id: 'blockout-3d', execute: payload => ({ workspace: 'modeler', payload }) }
+  ] });
+  const blockout = router.route({ purpose: '3d-blockout' });
+  assert.equal(blockout.toolId, 'blockout-3d');
+  assert.equal(blockout.available, true);
+  assert.equal(blockout.requiresHandoff, false);
+  assert.equal(router.route({ purpose: '3d-model' }).toolId, 'blender-3d');
+});
+
 test('multi-tool production plans preserve their intended order', () => {
   const router = createToolRouter();
   const plan = router.plan('3d-render-to-2d');

@@ -30,6 +30,8 @@ AIPaintの役割は、用途を判定し、適切な制作ツールへルーテ�
 
 AIPaint内に簡易Photoshop、簡易Blender、簡易Illustratorを再実装してから素材を作ることを標準経路にしない。
 
+例外として内蔵Blockout Modelerは、プリミティブ配置と変形による形状検討、カメラ確認、OBJ受け渡しだけを担当する。これはBlender代替ではなく、本制作へ渡す前の低コストな3Dラフ工程である。スカルプト、リグ、UV、テクスチャ、Geometry Nodes、アニメーション等へ機能範囲を膨張させない。
+
 ### 2. 制約保証と表現生成を分離する
 
 生成系ツールは形、デザイン、質感、構図を作る。
@@ -90,6 +92,8 @@ Tool Router
 ベクター素材 → Vector editor
 
 コンセプトアート → Image generation → Raster editor
+
+3Dブロックアウト → AIPaint Blockout Modeler
 
 3Dモデル → Blender/3D modeler
 
