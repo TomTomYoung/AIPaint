@@ -49,6 +49,7 @@ window.aipaintToolRouter = Object.freeze({
   listPurposes: () => toolRouter.listPurposes(),
   plan: purpose => toolRouter.plan(purpose),
   route: input => toolRouter.route(input),
+  registerAdapter: adapter => { const id = toolRouter.registerAdapter(adapter); syncRoutingControls(true); return id; },
   selectPurpose: purpose => { const result = toolRouter.selectPurpose(purpose); $('production-purpose').value = purpose; syncRoutingControls(true); return result; },
   selectTool: toolId => { const result = toolRouter.selectTool(toolId); $('production-tool').value = toolId; syncRoutingControls(false); return result; },
   execute: input => toolRouter.execute(input)
