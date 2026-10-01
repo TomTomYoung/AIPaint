@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Deterministic, agent-operable pixel painting on GitHub Pages",
   "scripts": {
-    "test": "node --test tests/core.test.js",
+    "test": "node --test tests/core.test.js tests/tool-router.test.js",
     "start": "python3 -m http.server 8000 --bind 127.0.0.1",
     "test:browser": "python3 tests/browser_test.py",
     "render": "python3 scripts/render.py"
