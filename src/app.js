@@ -1,5 +1,6 @@
 import { PaintCore, PaintError, LIMITS, check } from './core.js';
 import { createAgent, newId, rasterCanvas } from './agent.js';
+import { createToolRouter } from './tool-router.js';
 const $ = id => document.getElementById(id), canvas = $('canvas'), ctx = canvas.getContext('2d');
 const STORAGE = 'aipaint-project-v0.1';
 let activeLayer = null, tool = 'brush', gesture = null, saveTimer, frame, dirty = false;
@@ -8,6 +9,50 @@ function failure(e) { message(`${e.code || 'ERROR'}: ${e.message}`, true); }
 function guard(fn) { return async (...args) => { try { await fn(...args); } catch (e) { failure(e); } }; }
 const agent = createAgent(() => { dirty = true; render(); scheduleSave(); });
 window.paintAgent = agent;
+const toolRouter = createToolRouter({
+  adapters: [{ id: 'pixel', execute: payload => agent.runJob(payload) }]
+});
+function makeOption(value, label) {
+  const option = document.createElement('option'); option.value = value; option.textContent = label; return option;
+}
+function syncRoutingControls(rebuildTools = false) {
+  const purposeId = $('production-purpose').value || toolRouter.getState().activePurpose;
+  toolRouter.selectPurpose(purposeId);
+  const plan = toolRouter.plan(purposeId);
+  if (rebuildTools) {
+    const previous = $('production-tool').value || 'auto';
+    const allowed = new Set(plan.steps.map(step => step.toolId));
+    const toolOptions = [makeOption('auto', '自動（推奨ツール）')];
+    for (const tool of toolRouter.listTools().filter(item => allowed.has(item.id))) {
+      toolOptions.push(makeOption(tool.id, `${tool.label}${tool.available ? '' : '（未接続）'}`));
+    }
+    $('production-tool').replaceChildren(...toolOptions);
+    $('production-tool').value = previous === 'auto' || allowed.has(previous) ? previous : 'auto';
+  }
+  toolRouter.selectTool($('production-tool').value || 'auto');
+  const route = toolRouter.route(), currentPlan = toolRouter.plan();
+  const routeNames = currentPlan.steps.map(step => `${step.label}${step.available ? '' : '（未接続）'}`).join(' → ');
+  $('route-summary').textContent = route.available
+    ? `${routeNames}。現在の環境で実行できます。`
+    : `${routeNames}。外部アダプタ接続が必要です。Pixel Coreへ代替しません。`;
+  $('route-summary').classList.toggle('warning', !route.available);
+  $('engine-badge').textContent = route.available ? route.toolLabel : `${route.toolLabel} / HANDOFF`;
+}
+for (const purpose of toolRouter.listPurposes()) $('production-purpose').append(makeOption(purpose.id, purpose.label));
+$('production-purpose').value = toolRouter.getState().activePurpose;
+$('production-purpose').onchange = () => syncRoutingControls(true);
+$('production-tool').onchange = () => syncRoutingControls(false);
+syncRoutingControls(true);
+window.aipaintToolRouter = Object.freeze({
+  getState: () => toolRouter.getState(),
+  listTools: () => toolRouter.listTools(),
+  listPurposes: () => toolRouter.listPurposes(),
+  plan: purpose => toolRouter.plan(purpose),
+  route: input => toolRouter.route(input),
+  selectPurpose: purpose => { const result = toolRouter.selectPurpose(purpose); $('production-purpose').value = purpose; syncRoutingControls(true); return result; },
+  selectTool: toolId => { const result = toolRouter.selectTool(toolId); $('production-tool').value = toolId; syncRoutingControls(false); return result; },
+  execute: input => toolRouter.execute(input)
+});
 const context = () => { const s = agent.getState(); return { documentId: s.documentId, expectedRevision: s.revision }; };
 const exportContext = () => { const s = agent.getState(); return { documentId: s.documentId, revision: s.revision }; };
 const replaceContext = () => { const s = agent.getState(); return { replace: true, expectedDocumentId: s.documentId, expectedRevision: s.revision }; };
@@ -36,7 +81,7 @@ function render() {
       holder.append(cb, document.createTextNode(label)); row.append(holder);
     } return row;
   }));
-  $('agent-state').textContent = JSON.stringify({ state: s, capabilities: agent.getCapabilities() }, null, 2);
+  $('agent-state').textContent = JSON.stringify({ state: s, capabilities: agent.getCapabilities(), routing: toolRouter.getState() }, null, 2);
 }
 function scheduleSave() {
   clearTimeout(saveTimer); saveTimer = setTimeout(() => {
