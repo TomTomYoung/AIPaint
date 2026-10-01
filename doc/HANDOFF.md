@@ -2,7 +2,7 @@
 
 ## 最初に読むもの
 
-README.md、doc/SPEC.md、doc/STATUS.md、src/core.js、src/agent.js、tests/core.test.js、tests/browser_test.py、scripts/render.pyの順に確認してください。Notionの全体設計v1.0はdoc/README.mdから参照できます。Notionは別途の編集指示がなければ変更しないでください。
+README.md、doc/SPEC.md、doc/TOOLING_STRATEGY.md、doc/STATUS.md、src/tool-router.js、src/core.js、src/agent.js、tests/tool-router.test.js、tests/core.test.js、tests/browser_test.py、scripts/render.pyの順に確認してください。Notionの全体設計v1.0はdoc/README.mdから参照できます。Notionは別途の編集指示がなければ変更しないでください。
 
 ## 次の作業順
 
@@ -19,6 +19,8 @@ PNGと原稿一式を一コミットでpaint/output/<jobId>へ保存し、PRを�
 ## 守る境界
 
 UIの確定操作は必ずPaintCoreのコマンド経由にします。Canvasへの直接描画は表示・書き出しに限定します。座標、色、塗りつぶしの距離規則を人間用とAI用で別実装にしないでください。
+
+Pixel Coreを万能ツール扱いしないでください。3D、通常ラスター、ベクター、画像生成など別の専門ツールが適切な用途ではTool Routerから外部アダプタへ渡します。必要なアダプタが未接続なら `TOOL_UNAVAILABLE` とし、品質を落として別ツールへ黙ってフォールバックしないでください。制作経路にはプレビュー取得と視覚確認の反復を必須とし、Publisherやmanifestの拡張を制作フィードバックより先に進めないでください。
 
 原稿復元時にレイヤーを潰さないでください。v0.1の埋め込みRGBA原稿を将来PNG参照型Bundleへ移すときは、移行テストと旧原稿読込を残してください。
 
