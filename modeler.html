@@ -35,12 +35,20 @@
 
     <section>
       <h2>操作</h2>
-      <p class="help">ドラッグ：視点回転<br>ホイール：ズーム<br>オブジェクト選択：右の一覧</p>
+      <p class="help">空所ドラッグ：視点回転<br>オブジェクトをクリック：選択<br>色付きギズモをドラッグ：変形<br>G：移動 / R：回転 / S：拡縮<br>Shift＋ドラッグ：微調整<br>ホイール：ズーム</p>
     </section>
   </aside>
 
   <section class="viewport-panel">
-    <div class="viewport-bar"><span id="scene-summary"></span><span>透視投影 / Y-up</span></div>
+    <div class="viewport-bar">
+      <span id="scene-summary"></span>
+      <div class="gizmo-toolbar" role="group" aria-label="変形ギズモ">
+        <button data-gizmo="translate" aria-pressed="true" title="移動 G">移動 <kbd>G</kbd></button>
+        <button data-gizmo="rotate" aria-pressed="false" title="回転 R">回転 <kbd>R</kbd></button>
+        <button data-gizmo="scale" aria-pressed="false" title="拡縮 S">拡縮 <kbd>S</kbd></button>
+      </div>
+      <span><span id="gizmo-mode-label">移動</span> / 透視投影 / Y-up</span>
+    </div>
     <canvas id="model-canvas" width="900" height="620" tabindex="0" aria-label="3Dブロックアウト表示"></canvas>
     <div id="status" class="status" role="status" aria-live="polite">準備中です。</div>
   </section>
