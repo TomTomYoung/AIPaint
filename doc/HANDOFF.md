@@ -22,6 +22,8 @@ UIの確定操作は必ずPaintCoreのコマンド経由にします。Canvasへ
 
 Pixel Coreを万能ツール扱いしないでください。3D、通常ラスター、ベクター、画像生成など別の専門ツールが適切な用途ではTool Routerから外部アダプタへ渡します。必要なアダプタが未接続なら `TOOL_UNAVAILABLE` とし、品質を落として別ツールへ黙ってフォールバックしないでください。制作経路にはプレビュー取得と視覚確認の反復を必須とし、Publisherやmanifestの拡張を制作フィードバックより先に進めないでください。
 
+Object Modeler v0.2の責務はObject Mode相当までです。7種プリミティブ、階層/Group、複数選択、World/Local Transform、Pivot、Snap、Mirror、View、Undo/Redo、Outlinerは維持してください。ここからMesh Edit、Boolean、Subdivision、UV、Rig等を足す場合は、自前実装を始める前にBlender/MCPまたはGeometry Kernelへ委譲できないかを先に判断してください。旧 `blockout-modeler/0.1` シーンの読込互換も維持してください。
+
 原稿復元時にレイヤーを潰さないでください。v0.1の埋め込みRGBA原稿を将来PNG参照型Bundleへ移すときは、移行テストと旧原稿読込を残してください。
 
 batchIdの冪等性は現在のページ内だけです。ジョブの永続的冪等性と混同しないでください。新規原稿と旧セッションのdocumentId/revisionを混同しないでください。
