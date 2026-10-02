@@ -509,7 +509,7 @@ canvas.addEventListener('pointermove',event=>{
   }
 
   const h=drag.handle;
-  const fine=event.shiftKey?.2:1;
+  const fine=event.shiftKey ? .2 : 1;
   if (h.kind==='rotate') {
     const angle=Math.atan2(point[1]-h.center[1],point[0]-h.center[0]);
     let delta=angle-drag.startAngle;
