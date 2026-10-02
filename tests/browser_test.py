@@ -198,5 +198,76 @@ class BrowserTests(unittest.TestCase):
         self.assertGreater(abs(rotation_z), 45)
         self.assertIn('Z軸で回転しました', self.page.locator('#status').inner_text())
 
+    def test_14_modeler_object_mode_v02_workflow(self):
+        self.page.goto(self.origin + '/AIPaint/modeler.html')
+        wait_for_condition(self.page, '() => !!window.blockoutModeler && blockoutModeler.getState().objects.length === 1')
+        result = self.page.evaluate("""() => {
+          const base=blockoutModeler.getState().objects[0];
+          const arm=blockoutModeler.addObject('capsule',{name:'Arm',position:[2,0,0]});
+          const hand=blockoutModeler.addObject('wedge',{name:'Hand',position:[3,0,0]});
+          blockoutModeler.setParent(hand.id,arm.id);
+          const group=blockoutModeler.groupObjects([base.id,arm.id],'Body');
+          blockoutModeler.updateObject(group.id,{position:[2,0,0]});
+          const moved=blockoutModeler.getState();
+          const movedArm=moved.objects.find(o=>o.id===arm.id);
+          const movedHand=moved.objects.find(o=>o.id===hand.id);
+          const mirrored=blockoutModeler.mirrorSubtree(arm.id,'x');
+          blockoutModeler.setCamera({projection:'orthographic',yaw:0,pitch:0,orthoScale:7});
+          return {
+            types:moved.objects.map(o=>o.type),
+            armX:movedArm.position[0],
+            handX:movedHand.position[0],
+            parent:movedHand.parentId,
+            mirrorCount:mirrored.length,
+            projection:blockoutModeler.getState().camera.projection,
+            obj:blockoutModeler.exportOBJ()
+          };
+        }""")
+        self.assertIn('capsule', result['types'])
+        self.assertIn('wedge', result['types'])
+        self.assertGreater(result['armX'], 2.5)
+        self.assertGreater(result['handX'], 3.5)
+        self.assertIsNotNone(result['parent'])
+        self.assertGreaterEqual(result['mirrorCount'], 2)
+        self.assertEqual(result['projection'], 'orthographic')
+        self.assertIn('o Arm', result['obj'])
+        self.assertIn('Orthographic', self.page.locator('#projection-label').inner_text())
+
+        count_before = self.page.evaluate("blockoutModeler.getState().objects.length")
+        self.page.evaluate("blockoutModeler.undo()")
+        count_after_undo = self.page.evaluate("blockoutModeler.getState().objects.length")
+        self.assertLess(count_after_undo, count_before)
+        self.page.evaluate("blockoutModeler.redo()")
+        self.assertEqual(self.page.evaluate("blockoutModeler.getState().objects.length"), count_before)
+
+        self.page.evaluate("""() => {
+          const state=blockoutModeler.getState();
+          const arm=state.objects.find(o=>o.name==='Arm');
+          blockoutModeler.select(arm.id,arm.id);
+          blockoutModeler.updateObject(arm.id,{rotation:[0,0,90],position:[0,0,0]});
+          blockoutModeler.setAxisSpace('local');
+          blockoutModeler.setGizmoMode('translate');
+          blockoutModeler.setSnap({enabled:true,translate:.5});
+        }""")
+        canvas = self.page.locator('#model-canvas')
+        box = canvas.bounding_box()
+        gizmo = self.page.evaluate("blockoutModeler.getGizmoState()")
+        handle = next(h for h in gizmo['handles'] if h['axis'] == 'x')
+        dx = handle['to']['x'] - handle['from']['x']
+        dy = handle['to']['y'] - handle['from']['y']
+        length = max((dx * dx + dy * dy) ** .5, 1)
+        sx, sy = box['x'] + handle['to']['x'], box['y'] + handle['to']['y']
+        self.page.mouse.move(sx, sy)
+        self.page.mouse.down()
+        self.page.mouse.move(sx + dx / length * 90, sy + dy / length * 90, steps=8)
+        self.page.mouse.up()
+        moved = self.page.evaluate("""() => {
+          const o=blockoutModeler.getState().objects.find(o=>o.name==='Arm');
+          return o.position;
+        }""")
+        self.assertLess(abs(moved[0]), .2)
+        self.assertGreater(abs(moved[1]), .4)
+        self.assertAlmostEqual(moved[1] / .5, round(moved[1] / .5), places=6)
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

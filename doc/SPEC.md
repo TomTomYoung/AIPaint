@@ -13,9 +13,9 @@
 
 `src/tool-router.js`は制作用途と専門ツールを分離する上位ルータです。AIPaintのPixel Coreは唯一の万能レンダラではなく、ドット絵系用途を担当する一つのアダプタとして扱います。
 
-現行カタログはPixel Core、AIPaint Blockout Modeler、Raster editor、Vector editor、Image generation、Blender/3D modelerを持ちます。Blockout Modelerは `modeler.html` と `src/modeler-core.js` で構成し、立方体・球・円柱の3Dメッシュ、位置・回転・拡縮、透視表示、軌道カメラ、画面上の直接選択、移動・回転・拡縮ギズモ、編集可能シーンJSON、OBJ出力を提供します。ギズモはG/R/Sで切り替え、Shiftドラッグで微調整できます。本格3D用途は引き続きBlenderへルーティングします。用途ごとに単一ツールまたは順序付きパイプラインを定義します。例えば3D下絵から2D仕上げは `blender-3d → raster-editor`、コンセプトアートは `image-generation → raster-editor` です。
+現行カタログはPixel Core、AIPaint Object Modeler、Raster editor、Vector editor、Image generation、Blender/3D modelerを持ちます。Object Modeler v0.2は `modeler.html`、`src/modeler-app.js`、`src/modeler-core.js` で構成し、Box/Sphere/Cylinder/Cone/Capsule/Wedge/Plane、階層Transform、Empty Group、複数選択、World/Localギズモ、Pivot、Snap、Mirror、Perspective/Orthographic、正面・側面・上下・Isoビュー、Undo/Redo、Outliner表示/ロック、編集可能シーンJSON、OBJ出力を提供します。旧 `blockout-modeler/0.1` シーンは安全な既定値を補って読込可能です。本格Mesh Edit、Sculpt、UV、Rig、Animationは引き続きBlenderへルーティングします。用途ごとに単一ツールまたは順序付きパイプラインを定義します。例えば3D下絵から2D仕上げは `blender-3d → raster-editor`、コンセプトアートは `image-generation → raster-editor` です。
 
-ブラウザ版で現在登録済みの実行アダプタは `pixel` のみです。外部アダプタが未接続の用途は `requiresHandoff: true` として表現し、実行時は `TOOL_UNAVAILABLE` を返します。不適切な別レンダラへ自動フォールバックしません。
+ブラウザ版で現在ローカル実行可能なアダプタは `pixel` と `blockout-3d` です。外部アダプタが未接続の用途は `requiresHandoff: true` として表現し、実行時は `TOOL_UNAVAILABLE` を返します。不適切な別レンダラへ自動フォールバックしません。
 
 `window.aipaintToolRouter`から用途一覧、ツール一覧、計画、現在ルート、選択、実行を参照できます。`registerAdapter({ id, execute })`で実行中に外部アダプタを接続すると、UIの利用可能状態も更新されます。外部ツール固有のMCP接続実装は後続ですが、接続有無と推奨経路は同じルータ定義をUIとAgent側で共有します。
 

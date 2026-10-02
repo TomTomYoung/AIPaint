@@ -4,38 +4,81 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
-<title>AIPaint — Blockout Modeler</title>
+<title>AIPaint — Object Modeler</title>
 <link rel="icon" href="data:,"><link rel="stylesheet" href="./modeler.css">
 <script type="module" src="./src/modeler-app.js"></script>
 </head>
 <body>
 <header>
   <div>
-    <h1>AIPaint Blockout Modeler <small>0.1</small></h1>
-    <p>ゲーム素材の形状検討用。最終3D制作はBlender等へhandoffします。</p>
+    <h1>AIPaint Object Modeler <small>0.2</small></h1>
+    <p>ゲーム用ローポリの組み立て・形状検討。スカルプト、UV、Rig、本格Mesh EditはBlenderへhandoffします。</p>
   </div>
-  <div class="header-actions"><a class="button" href="./">Pixel workspace</a><button id="save-project">シーン保存</button><button id="export-obj" class="primary">OBJ書き出し</button></div>
+  <div class="header-actions">
+    <a class="button" href="./">Pixel workspace</a>
+    <button id="undo" title="Ctrl+Z">Undo</button>
+    <button id="redo" title="Ctrl+Shift+Z">Redo</button>
+    <button id="save-project">シーン保存</button>
+    <button id="export-obj" class="primary">OBJ書き出し</button>
+  </div>
 </header>
 <main>
-  <aside class="panel">
+  <aside class="panel left-panel">
     <h2>プリミティブ</h2>
     <div class="primitive-grid">
-      <button data-add="box">立方体</button>
-      <button data-add="sphere">球</button>
-      <button data-add="cylinder">円柱</button>
+      <button data-add="box">Box</button>
+      <button data-add="sphere">Sphere</button>
+      <button data-add="cylinder">Cylinder</button>
+      <button data-add="cone">Cone</button>
+      <button data-add="capsule">Capsule</button>
+      <button data-add="wedge">Wedge</button>
+      <button data-add="plane">Plane</button>
     </div>
-    <p class="help">形状を組み合わせてゲーム素材のブロックアウトを作ります。</p>
+
+    <section>
+      <h2>階層</h2>
+      <div class="row"><button id="group">Group</button><button id="ungroup">Ungroup</button></div>
+      <label>Parent<select id="parent-select"><option value="">None</option></select></label>
+      <p class="help">Shiftクリックで複数選択。Groupは選択物をEmpty配下へまとめます。</p>
+    </section>
+
+    <section>
+      <h2>Mirror</h2>
+      <div class="axis-buttons">
+        <button data-mirror="x">X</button><button data-mirror="y">Y</button><button data-mirror="z">Z</button>
+      </div>
+      <p class="help">選択ルートと子階層をワールド原点で鏡像複製します。</p>
+    </section>
+
+    <section>
+      <h2>Snap</h2>
+      <label class="check"><input id="snap-enabled" type="checkbox"> 有効</label>
+      <label>移動<select id="snap-translate"><option>.1</option><option selected>.25</option><option>.5</option><option>1</option></select></label>
+      <label>回転<select id="snap-rotate"><option>5</option><option selected>15</option><option>30</option><option>45</option></select></label>
+      <label>拡縮<select id="snap-scale"><option>.05</option><option selected>.1</option><option>.25</option><option>.5</option></select></label>
+    </section>
+
+    <section>
+      <h2>ビュー</h2>
+      <div class="view-grid">
+        <button data-view="front">Front</button><button data-view="back">Back</button>
+        <button data-view="left">Left</button><button data-view="right">Right</button>
+        <button data-view="top">Top</button><button data-view="bottom">Bottom</button>
+        <button data-view="iso">Iso</button><button id="toggle-projection">Ortho</button>
+      </div>
+      <button id="frame-selection" class="wide">選択へフォーカス</button>
+      <button id="reset-camera" class="wide">カメラ初期化</button>
+    </section>
 
     <section>
       <h2>シーン</h2>
       <button id="new-scene" class="wide">新規シーン</button>
       <label class="file-button">シーンJSONを開く<input id="open-project" type="file" accept=".json,application/json"></label>
-      <button id="reset-camera" class="wide">カメラを初期位置へ</button>
     </section>
 
     <section>
       <h2>操作</h2>
-      <p class="help">空所ドラッグ：視点回転<br>オブジェクトをクリック：選択<br>色付きギズモをドラッグ：変形<br>G：移動 / R：回転 / S：拡縮<br>Shift＋ドラッグ：微調整<br>ホイール：ズーム</p>
+      <p class="help">クリック：選択<br>Shiftクリック：複数選択<br>空所ドラッグ：視点回転<br>ギズモ：直接変形<br>G / R / S：移動 / 回転 / 拡縮<br>W：World / Local<br>Shift＋ドラッグ：微調整<br>ホイール：ズーム</p>
     </section>
   </aside>
 
@@ -46,22 +89,26 @@
         <button data-gizmo="translate" aria-pressed="true" title="移動 G">移動 <kbd>G</kbd></button>
         <button data-gizmo="rotate" aria-pressed="false" title="回転 R">回転 <kbd>R</kbd></button>
         <button data-gizmo="scale" aria-pressed="false" title="拡縮 S">拡縮 <kbd>S</kbd></button>
+        <button id="axis-space" title="World/Local W">World <kbd>W</kbd></button>
       </div>
-      <span><span id="gizmo-mode-label">移動</span> / 透視投影 / Y-up</span>
+      <span><span id="gizmo-mode-label">移動</span> / <span id="projection-label">Perspective</span> / Y-up</span>
     </div>
-    <canvas id="model-canvas" width="900" height="620" tabindex="0" aria-label="3Dブロックアウト表示"></canvas>
+    <canvas id="model-canvas" width="900" height="620" tabindex="0" aria-label="3Dオブジェクトモデラー"></canvas>
     <div id="status" class="status" role="status" aria-live="polite">準備中です。</div>
   </section>
 
   <aside class="panel inspector">
-    <div class="section-title"><h2>オブジェクト</h2><span id="revision"></span></div>
+    <div class="section-title"><h2>Outliner</h2><span id="revision"></span></div>
+    <div id="selection-summary" class="selection-summary">0 selected</div>
     <div id="object-list"></div>
     <div class="row"><button id="duplicate">複製</button><button id="remove">削除</button></div>
 
     <section>
-      <h2>選択オブジェクト</h2>
+      <h2>Active Object</h2>
       <label>名前<input id="object-name" type="text" maxlength="80"></label>
       <label>色<input id="object-color" type="color" value="#8aa3a0"></label>
+      <label class="check"><input id="object-visible" type="checkbox"> 表示</label>
+      <label class="check"><input id="object-locked" type="checkbox"> ロック</label>
 
       <h3>位置</h3>
       <div class="triple">
@@ -83,11 +130,19 @@
         <label>Y<input id="scale-y" type="number" min="0.01" step="0.1"></label>
         <label>Z<input id="scale-z" type="number" min="0.01" step="0.1"></label>
       </div>
+
+      <h3>Pivot local</h3>
+      <div class="triple">
+        <label>X<input id="pivot-x" type="number" step="0.1"></label>
+        <label>Y<input id="pivot-y" type="number" step="0.1"></label>
+        <label>Z<input id="pivot-z" type="number" step="0.1"></label>
+      </div>
+      <div class="row"><button id="pivot-center">Center</button><button id="pivot-bottom">Bottom</button></div>
     </section>
 
     <details><summary>Agent API</summary><pre>window.blockoutModeler</pre></details>
   </aside>
 </main>
-<footer>Blockout専用。スカルプト、リグ、UV、本格マテリアル、アニメーションはBlender等の専門ツールへ。</footer>
+<footer>Object Mode v0.2。低ポリの組み立てまではここで、本格Mesh Edit・UV・Rig・SculptはBlenderへ。</footer>
 </body>
 </html>
