@@ -457,7 +457,11 @@ canvas.addEventListener('pointermove',event=>{
 function endDrag(event){
   if(!drag||(event&&drag.id!==event.pointerId))return;
   const was=drag;drag=null;canvas.style.cursor='grab';
-  if(was.kind==='gizmo'){core.endHistoryGroup();syncUI();message(`${was.handle.axis.toUpperCase()}軸で変形しました。`);}
+  if(was.kind==='gizmo'){
+    core.endHistoryGroup();syncUI();
+    const verb=was.handle.kind==='translate'?'移動':was.handle.kind==='rotate'?'回転':'拡縮';
+    message(`${was.handle.axis.toUpperCase()}軸で${verb}しました。`);
+  }
 }
 canvas.addEventListener('pointerup',guard(endDrag));
 canvas.addEventListener('pointercancel',guard(event=>{if(drag?.kind==='gizmo')core.cancelHistoryGroup();drag=null;syncUI();}));
