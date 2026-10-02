@@ -363,8 +363,13 @@ function inputVec(prefix){return['x','y','z'].map(axis=>Number($(`${prefix}-${ax
 for(const kind of ['pos','rot','scale','pivot']){
   for(const axis of ['x','y','z']){
     $(`${kind}-${axis}`).onchange=guard(()=>{
-      if(!activeId)return;const key=kind==='pos'?'position':kind==='rot'?'rotation':kind==='scale'?'scale':'pivot';
-      core.updateObject(activeId,{[key]:inputVec(kind)});syncUI();message('Transformを更新しました。');
+      if(!activeId)return;
+      if(kind==='pivot')core.setPivot(activeId,inputVec(kind));
+      else{
+        const key=kind==='pos'?'position':kind==='rot'?'rotation':'scale';
+        core.updateObject(activeId,{[key]:inputVec(kind)});
+      }
+      syncUI();message('Transformを更新しました。');
     });
   }
 }
@@ -372,8 +377,8 @@ $('object-name').onchange=guard(()=>{if(activeId){core.updateObject(activeId,{na
 $('object-color').onchange=guard(()=>{if(activeId){core.updateObject(activeId,{color:$('object-color').value});syncUI();}});
 $('object-visible').onchange=guard(()=>{if(activeId){core.updateObject(activeId,{visible:$('object-visible').checked});syncUI();}});
 $('object-locked').onchange=guard(()=>{if(activeId){core.updateObject(activeId,{locked:$('object-locked').checked});syncUI();}});
-$('pivot-center').onclick=guard(()=>{if(activeId){core.updateObject(activeId,{pivot:[0,0,0]});syncUI();}});
-$('pivot-bottom').onclick=guard(()=>{if(activeId){core.updateObject(activeId,{pivot:[0,-.5,0]});syncUI();}});
+$('pivot-center').onclick=guard(()=>{if(activeId){core.setPivot(activeId,[0,0,0]);syncUI();}});
+$('pivot-bottom').onclick=guard(()=>{if(activeId){core.setPivot(activeId,[0,-.5,0]);syncUI();}});
 
 function setView(name){
   const views={front:[0,0],back:[180,0],right:[90,0],left:[-90,0],top:[0,89],bottom:[0,-89],iso:[35,22]};
@@ -436,10 +441,12 @@ canvas.addEventListener('pointermove',event=>{
     if(h.kind==='translate'){
       for(const id of drag.roots){const start=drag.startObjects.get(id);core.updateObject(id,{position:add(start.position,mul(h.axisDir,delta))});}
     }else{
-      let factor=Math.max(.01,1+delta);
+      const rawFactor=Math.max(.01,1+delta);
       for(const id of drag.roots){
         const start=drag.startObjects.get(id),scale=[...start.scale];
-        let target=start.scale[h.index]*factor;if(snap.enabled)target=Math.max(.01,quantize(target,snap.scale));factor=target/start.scale[h.index];scale[h.index]=target;
+        let factor=rawFactor,target=start.scale[h.index]*factor;
+        if(snap.enabled)target=Math.max(.01,quantize(target,snap.scale));
+        factor=target/start.scale[h.index];scale[h.index]=target;
         const rel=sub(start.position,drag.pivot),along=dot(rel,h.axisDir),position=add(start.position,mul(h.axisDir,along*(factor-1)));
         core.updateObject(id,{position,scale});
       }
@@ -500,6 +507,7 @@ window.blockoutModeler=Object.freeze({
   removeObject:id=>{const o=core.removeObject(id);selectedIds.delete(id);if(activeId===id)activeId=null;syncUI();return o;},
   duplicateObject:id=>{const o=core.duplicateObject(id);setSelection([o.id],o.id);return o;},
   setParent:(id,parentId)=>{const o=core.setParent(id,parentId);syncUI();return o;},
+  setPivot:(id,pivot)=>{const o=core.setPivot(id,pivot);syncUI();return o;},
   groupObjects:(ids,name)=>{const o=core.groupObjects(ids,name);setSelection([o.id],o.id);return o;},
   mirrorSubtree:(id,axis)=>{const a=core.mirrorSubtree(id,axis);setSelection([a[0].id],a[0].id);return a;},
   undo:()=>{const s=core.undo();syncUI();return s;},
