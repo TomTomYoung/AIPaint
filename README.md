@@ -6,7 +6,7 @@
 
 ドット描画を先に実装しています。ペン、消しゴム、直線、塗りつぶし矩形・楕円、バケツ、ピクセル指定、色置換、レイヤー、Undo/Redo、PNG出力、レイヤー付き原稿JSONの保存・復元、ブラウザ内自動保存、JSON命令、サンプルジョブを備えます。
 
-用途別Tool Routerを追加し、ドット絵はPixel Core、簡易3D形状検討は内蔵Blockout Modeler、本格3DはBlender/3D modeler、ベクターはVector editor、複雑な初稿はImage generationなどへ明示的にルーティングします。内蔵Blockout Modelerは立方体・球・円柱、移動・回転・拡縮、視点操作、シーンJSON、OBJ出力に限定します。スカルプト、リグ、UV、アニメーション等はBlenderへhandoffし、内蔵機能を万能化しません。
+用途別Tool Routerを追加し、ドット絵はPixel Core、簡易3D形状検討は内蔵Blockout Modeler、本格3DはBlender/3D modeler、ベクターはVector editor、複雑な初稿はImage generationなどへ明示的にルーティングします。内蔵Blockout Modelerは立方体・球・円柱、画面上の直接選択、移動・回転・拡縮ギズモ、数値変形、視点操作、シーンJSON、OBJ出力に限定します。スカルプト、リグ、UV、アニメーション等はBlenderへhandoffし、内蔵機能を万能化しません。
 
 ## 起動
 
