@@ -372,7 +372,8 @@ export class ModelerCore{
   updateObject(id,patch){
     const index=this.#objects.findIndex(o=>o.id===id),current=this.#objects[index];
     check(current,'OBJECT_NOT_FOUND','Object not found');
-    check(!this.isEffectivelyLocked(id),'OBJECT_LOCKED','Object is locked');
+    const unlockingSelf=current.locked&&patch?.locked===false&&Object.keys(patch).every(k=>k==='locked');
+    check(!this.isEffectivelyLocked(id)||unlockingSelf,'OBJECT_LOCKED','Object is locked');
     const allowed=new Set(['name','position','rotation','scale','pivot','color','visible','locked']);
     check(patch&&typeof patch==='object'&&!Array.isArray(patch),'INVALID_INPUT','Patch required');
     check(Object.keys(patch).every(k=>allowed.has(k)),'INVALID_INPUT','Unknown object field');
