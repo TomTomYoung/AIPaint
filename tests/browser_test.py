@@ -207,7 +207,7 @@ class BrowserTests(unittest.TestCase):
           const hand=blockoutModeler.addObject('wedge',{name:'Hand',position:[3,0,0]});
           blockoutModeler.setParent(hand.id,arm.id);
           const group=blockoutModeler.groupObjects([base.id,arm.id],'Body');
-          blockoutModeler.updateObject(group.id,{position:[1,0,0]});
+          blockoutModeler.updateObject(group.id,{position:[2,0,0]});
           const moved=blockoutModeler.getState();
           const movedArm=moved.objects.find(o=>o.id===arm.id);
           const movedHand=moved.objects.find(o=>o.id===hand.id);
