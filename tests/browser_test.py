@@ -156,5 +156,47 @@ class BrowserTests(unittest.TestCase):
         self.assertIn('f ', result['obj'])
         self.assertTrue(self.page.locator('#model-canvas').is_visible())
 
+    def test_13_modeler_transform_gizmos(self):
+        self.page.goto(self.origin + '/AIPaint/modeler.html')
+        wait_for_condition(self.page, '() => !!window.blockoutModeler && blockoutModeler.getState().objects.length === 1')
+        self.page.evaluate("blockoutModeler.setCamera({yaw:35,pitch:22,distance:8,target:[0,0,0]})")
+        canvas = self.page.locator('#model-canvas')
+        box = canvas.bounding_box()
+
+        def drag_axis(mode, axis, pixels):
+            self.page.evaluate(f"blockoutModeler.setGizmoMode('{mode}')")
+            gizmo = self.page.evaluate("blockoutModeler.getGizmoState()")
+            handle = next(h for h in gizmo['handles'] if h['axis'] == axis)
+            dx = handle['to']['x'] - handle['from']['x']
+            dy = handle['to']['y'] - handle['from']['y']
+            length = max((dx * dx + dy * dy) ** .5, 1)
+            sx, sy = box['x'] + handle['to']['x'], box['y'] + handle['to']['y']
+            self.page.mouse.move(sx, sy)
+            self.page.mouse.down()
+            self.page.mouse.move(sx + dx / length * pixels, sy + dy / length * pixels, steps=8)
+            self.page.mouse.up()
+
+        before_x = self.page.evaluate("blockoutModeler.getState().objects[0].position[0]")
+        drag_axis('translate', 'x', 70)
+        after_x = self.page.evaluate("blockoutModeler.getState().objects[0].position[0]")
+        self.assertGreater(after_x, before_x + .15)
+
+        before_scale = self.page.evaluate("blockoutModeler.getState().objects[0].scale[1]")
+        drag_axis('scale', 'y', 55)
+        after_scale = self.page.evaluate("blockoutModeler.getState().objects[0].scale[1]")
+        self.assertGreater(after_scale, before_scale + .1)
+
+        self.page.evaluate("blockoutModeler.setGizmoMode('rotate')")
+        gizmo = self.page.evaluate("blockoutModeler.getGizmoState()")
+        ring = next(h for h in gizmo['handles'] if h['axis'] == 'z')
+        cx, cy, radius = ring['center']['x'], ring['center']['y'], ring['radius']
+        self.page.mouse.move(box['x'] + cx + radius, box['y'] + cy)
+        self.page.mouse.down()
+        self.page.mouse.move(box['x'] + cx, box['y'] + cy + radius, steps=8)
+        self.page.mouse.up()
+        rotation_z = self.page.evaluate("blockoutModeler.getState().objects[0].rotation[2]")
+        self.assertGreater(abs(rotation_z), 45)
+        self.assertIn('Z軸で回転しました', self.page.locator('#status').inner_text())
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
