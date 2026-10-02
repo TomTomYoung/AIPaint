@@ -58,10 +58,10 @@ test('reparent preserves current world transform and rejects cycles', () => {
 });
 
 test('grouping selected objects is one undo step', () => {
-  const core=new ModelerCore();
+  let core=new ModelerCore();
   const a=core.addObject('box',{position:[-1,0,0]});
   const b=core.addObject('box',{position:[1,0,0]});
-  while(core.getState().canUndo) core.undo();
+  core=ModelerCore.fromProject(core.exportProject());
   const group=core.groupObjects([a.id,b.id],'Pair');
   assert.equal(core.getState().objects.find(o=>o.id===a.id).parentId,group.id);
   core.undo();
@@ -73,9 +73,9 @@ test('grouping selected objects is one undo step', () => {
 });
 
 test('history grouping collapses drag-like updates into one undo', () => {
-  const core=new ModelerCore();
+  let core=new ModelerCore();
   const box=core.addObject('box');
-  while(core.getState().canUndo) core.undo();
+  core=ModelerCore.fromProject(core.exportProject());
   core.beginHistoryGroup();
   core.updateObject(box.id,{position:[1,0,0]});
   core.updateObject(box.id,{position:[2,0,0]});
