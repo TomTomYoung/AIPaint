@@ -419,7 +419,7 @@ canvas.addEventListener('pointermove',event=>{
     const dx=event.clientX-drag.x,dy=event.clientY-drag.y;
     core.setCamera({yaw:drag.yaw-dx*.45,pitch:clamp(drag.pitch+dy*.35,-89,89)});refreshMeta();requestRender();return;
   }
-  const h=drag.handle,fine=event.shiftKey?.2:1;
+  const h=drag.handle,fine=event.shiftKey ? .2 : 1;
   if(h.kind==='rotate'){
     const angle=Math.atan2(point[1]-h.center[1],point[0]-h.center[0]);let degrees=(angle-drag.startAngle)*180/Math.PI*fine;
     while(degrees>180)degrees-=360;while(degrees<-180)degrees+=360;
@@ -454,7 +454,13 @@ function endDrag(event){
 }
 canvas.addEventListener('pointerup',guard(endDrag));
 canvas.addEventListener('pointercancel',guard(event=>{if(drag?.kind==='gizmo')core.cancelHistoryGroup();drag=null;syncUI();}));
-canvas.addEventListener('lostpointercapture',()=>{if(drag?.kind==='orbit')drag=null;});
+canvas.addEventListener('lostpointercapture',()=>{
+  if(drag?.kind==='gizmo'){
+    try{core.endHistoryGroup();}catch{/* transform may already be committed */}
+    syncUI();
+  }
+  drag=null;
+});
 canvas.addEventListener('wheel',event=>{
   event.preventDefault();const c=core.getState().camera;
   if(c.projection==='orthographic')core.setCamera({orthoScale:clamp(c.orthoScale*Math.exp(event.deltaY*.0012),.1,500)});
