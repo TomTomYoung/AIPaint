@@ -1,12 +1,12 @@
 # 実装状況
 
-更新日：2026-10-02。実装版：0.1.0 + Tool Router。
+更新日：2026-10-02。実装版：0.1.0 + Tool Router + Object Modeler v0.2。
 
 ## 実装済み
 
 ドット描画エンジン、13種類のコマンド、レイヤー構成・ロック・表示・不透明度、原稿スナップショット、一括操作、revision競合、セッション内再送排除、Undo/Redo、日本語UI、ドラッグプレビュー、PNG/原稿出力、原稿読込、ブラウザ内自動保存、JSON操作、検証付きサンプルジョブ、Playwright自動描画スクリプトを実装しています。
 
-用途別Tool Routerを追加しました。Pixel、通常ラスター、ベクター、画像生成、3Dの制作経路を分離し、用途ごとの単一ツールまたはパイプラインを定義します。ブラウザUIから用途と経路を切り替えられます。ローカル実行可能な専門ツールとしてPixel Coreに加えてBlockout Modelerを実装しました。Blockout Modelerはプリミティブ3種、画面上の直接選択、移動・回転・拡縮ギズモ、数値変形、軌道カメラ、3D表示、シーンJSON、OBJ出力までです。本格3Dは引き続きBlender handoffです。
+用途別Tool Routerを追加しました。Pixel、通常ラスター、ベクター、画像生成、3Dの制作経路を分離し、用途ごとの単一ツールまたはパイプラインを定義します。ブラウザUIから用途と経路を切り替えられます。ローカル実行可能な専門ツールとしてPixel Coreに加えてObject Modeler v0.2を実装しました。プリミティブ7種、階層、Group、複数選択、World/Localギズモ、Pivot、Snap、Mirror、Perspective/Orthographicビュー、Undo/Redo、Outliner表示/ロック、シーンJSON、OBJ出力までです。本格Mesh Edit以降は引き続きBlender handoffです。
 
 GitHub ActionsのCI定義と、仕様・進捗・引き継ぎ文書を追加しています。CIは読み取り権限でテストし、成果物をActions artifactへ出す構成です。これは素材の別リポジトリ格納機能ではありません。
 
