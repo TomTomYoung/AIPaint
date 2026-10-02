@@ -30,6 +30,17 @@ test('objects support pivot visibility lock and transforms', () => {
   assert.throws(()=>core.updateObject(box.id,{position:[2,2,3]}),error=>error.code==='OBJECT_LOCKED');
 });
 
+test('pivot changes preserve rendered geometry while moving the transform origin', () => {
+  const core=new ModelerCore();
+  const box=core.addObject('box',{position:[2,3,4],rotation:[0,0,30],scale:[2,3,1]});
+  const before=core.meshFor(box.id).vertices;
+  core.setPivot(box.id,[0,-.5,0]);
+  const after=core.meshFor(box.id).vertices;
+  assert.equal(after.length,before.length);
+  for(let i=0;i<before.length;i++)for(let j=0;j<3;j++)assert.ok(Math.abs(after[i][j]-before[i][j])<1e-9);
+  assert.deepEqual(core.getState().objects[0].pivot,[0,-.5,0]);
+});
+
 test('parent translation rotation and scale propagate through hierarchy', () => {
   const core=new ModelerCore();
   const parent=core.addObject('group',{name:'Arm',position:[0,0,0]});
