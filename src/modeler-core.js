@@ -409,6 +409,20 @@ export class ModelerCore{
     return clone(next);
   }
 
+  setPivot(id,pivot){
+    const object=this.#objects.find(o=>o.id===id);
+    check(object,'OBJECT_NOT_FOUND','Object not found');
+    check(!this.isEffectivelyLocked(id),'OBJECT_LOCKED','Object is locked');
+    const nextPivot=vec3(pivot,'pivot',-1000,1000);
+    const deltaLocal=mulComponents(sub(nextPivot,object.pivot),object.scale);
+    const deltaWorld=rotateXYZ(deltaLocal,object.rotation);
+    this.#beforeMutation();
+    object.position=add(object.position,deltaWorld);
+    object.pivot=nextPivot;
+    this.#afterMutation();
+    return clone(object);
+  }
+
   removeObject(id){
     const index=this.#objects.findIndex(o=>o.id===id),object=this.#objects[index];
     check(object,'OBJECT_NOT_FOUND','Object not found');
